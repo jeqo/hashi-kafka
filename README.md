@@ -1,0 +1,1 @@
+# Kafka deployment on top of Hashicorp stack
