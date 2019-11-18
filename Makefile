@@ -1,6 +1,36 @@
 .PHONY: all
 all:
 
+.PHONY: consul
+consul:
+	sudo consul agent -dev -client=172.17.0.1 -dns-port=53
+
+.PHONY: vault
+vault:	
+	sudo vault server -dev --dev-listen-address=172.17.0.1:8200 -dev-root-token-id=root
+
+.PHONY: nomad
+nomad:
+	sudo nomad agent -dev -bind=172.17.0.1 -network-interface=docker0 \
+		-consul-address=172.17.0.1:8500 \
+		-vault-enabled=true \
+		-vault-address=http://172.17.0.1:8200 \
+		-vault-token=root
+
+# -vault-ca-path=root-ca.pem
+
+.PHONY: run-kafka-job
+run-kafka-job:
+	nomad job run -address=http://172.17.0.1:4646 kafka.nomad
+
+.PHONY: kill-kafka-job
+kill-kafka-job:
+	nomad job stop -purge -address=http://172.17.0.1:4646 kafka
+
+# Demo Vault Kafka from https://opencredo.com/blogs/securing-kafka-using-vault-pki/
+.PHONY: ca
+ca: ca-root ca-root-pem ca-root-crl ca-int-kafka ca-int-kafka-csr ca-root-sign-int-kafka ca-int-kafka-set-signed ca-int-kafka-crl
+
 .PHONY: ca-root
 ca-root:
 	vault secrets enable -path root-ca pki
@@ -45,6 +75,8 @@ ca-int-kafka-crl:
 # up to this point CAs should be up and running
 
 ## PKI roles
+.PHONY: pki
+pki: pki-role-kafka-client pki-role-kafka-server vault-policy-kafka-client vault-policy-kafka-server
 
 .PHONY: pki-role-kafka-client
 pki-role-kafka-client:
@@ -72,9 +104,14 @@ vault-policy-kafka-server:
 
 ## Java security configuration
 
-.PHONY: kafka-server-token
-kafka-server-token:
-	VAULT_TOKEN=$(vault token create -role kafka-server) \
-	vault write -field certificate kafka-int-ca/issue/kafka-server \
- 		common_name=node-1.servers.kafka.acme.com alt_names=localhost \
-    	format=pem_bundle > node-1.pem
+.PHONY: truststore
+truststore:
+	keytool -import -alias root-ca -trustcacerts -file root-ca.pem -keystore kafka-truststore.jks -deststorepass changeme
+	keytool -import -alias kafka-int-ca -trustcacerts -file kafka-int-ca.pem -keystore kafka-truststore.jks -deststorepass changeme
+
+# .PHONY: kafka-server-token
+# kafka-server-token:
+# 	VAULT_TOKEN=$(vault token create -role kafka-server) \
+# 	vault write -field certificate kafka-int-ca/issue/kafka-server \
+#  		common_name=node-1.servers.kafka.acme.com alt_names=localhost \
+#     	format=pem_bundle > node-1.pem
