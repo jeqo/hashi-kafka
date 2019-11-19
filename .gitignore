@@ -1,4 +1,5 @@
 *.tgz
 *.csr
 *.pem
+*.p12
 *.jks

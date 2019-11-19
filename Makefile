@@ -19,13 +19,13 @@ nomad:
 
 # -vault-ca-path=root-ca.pem
 
-.PHONY: run-kafka-job
-run-kafka-job:
-	nomad job run -address=http://172.17.0.1:4646 kafka.nomad
+# .PHONY: run-kafka-job
+# run-kafka-job:
+# 	nomad job run -address=http://172.17.0.1:4646 kafka.nomad
 
-.PHONY: kill-kafka-job
-kill-kafka-job:
-	nomad job stop -purge -address=http://172.17.0.1:4646 kafka
+# .PHONY: kill-kafka-job
+# kill-kafka-job:
+# 	nomad job stop -purge -address=http://172.17.0.1:4646 kafka
 
 # Demo Vault Kafka from https://opencredo.com/blogs/securing-kafka-using-vault-pki/
 .PHONY: pki
@@ -81,26 +81,24 @@ pki-roles: pki-role-kafka-client pki-role-kafka-server vault-policy-kafka-client
 .PHONY: pki-role-kafka-client
 pki-role-kafka-client:
 	vault write kafka-int-ca/roles/kafka-client \
-    	allowed_domains=clients.kafka.acme.com \
+    	allowed_domains=service.consul \
     	allow_subdomains=true max_ttl=72h
 
 .PHONY: pki-role-kafka-server
 pki-role-kafka-server:
 	vault write kafka-int-ca/roles/kafka-server \
-	    allowed_domains=servers.kafka.acme.com \
+	    allowed_domains=service.consul \
 	    allow_subdomains=true max_ttl=72h
 
 .PHONY: vault-policy-kafka-client
 vault-policy-kafka-client:
 	vault policy write kafka-client vault/kafka-client.hcl
-	vault write auth/token/roles/kafka-client \
- 	   allowed_policies=kafka-client period=24h
+	vault write auth/token/roles/kafka-client allowed_policies=kafka-client period=24h
 
 .PHONY: vault-policy-kafka-server
 vault-policy-kafka-server:
 	vault policy write kafka-server vault/kafka-server.hcl
-	vault write auth/token/roles/kafka-server \
- 	   allowed_policies=kafka-server period=24h
+	vault write auth/token/roles/kafka-server allowed_policies=kafka-server period=24h
 
 ## Java security configuration
 
@@ -109,6 +107,13 @@ truststore:
 	keytool -import -alias root-ca -trustcacerts -file root-ca.pem -keystore kafka-truststore.jks -deststorepass changeme
 	keytool -import -alias kafka-int-ca -trustcacerts -file kafka-int-ca.pem -keystore kafka-truststore.jks -deststorepass changeme
 
+.PHONY: client-keystore
+client-keystore:
+	vault write -field certificate kafka-int-ca/issue/kafka-client \
+	    common_name=my-client.client.kafka.service.consul format=pem_bundle > client.pem
+	openssl pkcs12 -inkey client.pem -in client.pem -name client -export -out client.p12
+	keytool -importkeystore -deststorepass changeme \
+	    -destkeystore client-keystore.jks -srckeystore client.p12 -srcstoretype PKCS12
 # .PHONY: kafka-server-token
 # kafka-server-token:
 # 	VAULT_TOKEN=$(vault token create -role kafka-server) \
