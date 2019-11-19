@@ -65,3 +65,9 @@ $KAFKA_HOME/bin/kafka-console-producer.sh --broker-list <one of consul instances
 ```bash
 $KAFKA_HOME/bin/kafka-console-consumer.sh --bootstrap-server <one of consul instances> --topic test --consumer.config consumer.properties --from-beginning
 ```
+
+## Next steps
+
+-[] Volumes for data
+-[] Vault secrets for credentials
+...
