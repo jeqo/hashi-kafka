@@ -68,6 +68,6 @@ $KAFKA_HOME/bin/kafka-console-consumer.sh --bootstrap-server <one of consul inst
 
 ## Next steps
 
--[] Volumes for data
--[] Vault secrets for credentials
+* [ ] Volumes for data
+* [ ] Vault secrets for credentials
 ...
