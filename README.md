@@ -3,10 +3,11 @@
 ## Prepare local environment
 
 ```bash
-sudo consul agent -dev -client 172.17.0.1 -dns-port 53
-# other terminal
-sudo nomad agent -dev -consul-address=172.17.0.1:8500 -bind=172.17.0.1 -network-interface=docker0
+make vault
+make consul
+make nomad
 ```
+
 > `172.17.0.1` is `docker0` network interface IP.
 
 ## Zookeeper
@@ -20,3 +21,47 @@ sudo nomad agent -dev -consul-address=172.17.0.1:8500 -bind=172.17.0.1 -network-
 ## Kafka
 
 4 broker cluster.
+
+### Single group, 4 instances.
+
+[nomad config](./kafka-group.nomad)
+
+Steps to reproduce:
+
+* Check `vault`, `consul`, and `nomad` are running.
+* Prepare `vault`:
+
+```bash
+source .env
+make pki
+make pki-roles
+```
+
+* Run job: `nomad job run kafka-group.nomad`
+* Once cluster is running, create a topic:
+
+```bash
+$KAFKA_HOME/bin/kafka-topics.sh --zookeeper 172.17.0.1:12181 --create --topic test --replication-factor 3 --partitions 4
+```
+
+* Generate a client truststore and keystore:
+
+```bash
+make truststore
+```
+
+```bash
+vault token create -role kafka-client
+export VAULT_TOKEN=(server vault token)
+make client-keystore
+```
+
+* Run a producer:
+
+```bash
+$KAFKA_HOME/bin/kafka-console-producer.sh --broker-list <one of consul instances> --topic test --producer.config producer.properties
+```
+
+```bash
+$KAFKA_HOME/bin/kafka-console-consumer.sh --bootstrap-server <one of consul instances> --topic test --consumer.config consumer.properties --from-beginning
+```
