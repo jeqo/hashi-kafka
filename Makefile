@@ -28,8 +28,8 @@ kill-kafka-job:
 	nomad job stop -purge -address=http://172.17.0.1:4646 kafka
 
 # Demo Vault Kafka from https://opencredo.com/blogs/securing-kafka-using-vault-pki/
-.PHONY: ca
-ca: ca-root ca-root-pem ca-root-crl ca-int-kafka ca-int-kafka-csr ca-root-sign-int-kafka ca-int-kafka-set-signed ca-int-kafka-crl
+.PHONY: pki
+pki: ca-root ca-root-pem ca-root-crl ca-int-kafka ca-int-kafka-csr ca-root-sign-int-kafka ca-int-kafka-set-signed ca-int-kafka-crl
 
 .PHONY: ca-root
 ca-root:
@@ -75,8 +75,8 @@ ca-int-kafka-crl:
 # up to this point CAs should be up and running
 
 ## PKI roles
-.PHONY: pki
-pki: pki-role-kafka-client pki-role-kafka-server vault-policy-kafka-client vault-policy-kafka-server
+.PHONY: pki-roles
+pki-roles: pki-role-kafka-client pki-role-kafka-server vault-policy-kafka-client vault-policy-kafka-server
 
 .PHONY: pki-role-kafka-client
 pki-role-kafka-client:
