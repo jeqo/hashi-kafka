@@ -5,32 +5,35 @@ services:
     image: confluentinc/cp-zookeeper:5.3.1
     ports:
       - 12181:12181
+    network_mode: host
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 12181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
-      ZOOKEEPER_SERVERS: zookeeper1:12888:13888;zookeeper2:22888:23888;zookeeper3:32888:33888
+      ZOOKEEPER_SERVERS: 172.17.0.1:12888:13888;172.17.0.1:22888:23888;172.17.0.1:32888:33888
   zookeeper2:
     image: confluentinc/cp-zookeeper:5.3.1
     ports:
       - 22181:22181
+    network_mode: host
     environment:
       ZOOKEEPER_SERVER_ID: 2
       ZOOKEEPER_CLIENT_PORT: 22181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
-      ZOOKEEPER_SERVERS: zookeeper1:12888:13888;zookeeper2:22888:23888;zookeeper3:32888:33888
+      ZOOKEEPER_SERVERS: 172.17.0.1:12888:13888;172.17.0.1:22888:23888;172.17.0.1:32888:33888
   zookeeper3:
     image: confluentinc/cp-zookeeper:5.3.1
     ports:
       - 32181:32181
+    network_mode: host
     environment:
       ZOOKEEPER_SERVER_ID: 3
       ZOOKEEPER_CLIENT_PORT: 32181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_INIT_LIMIT: 5
       ZOOKEEPER_SYNC_LIMIT: 2
-      ZOOKEEPER_SERVERS: zookeeper1:12888:13888;zookeeper2:22888:23888;zookeeper3:32888:33888
+      ZOOKEEPER_SERVERS: 172.17.0.1:12888:13888;172.17.0.1:22888:23888;172.17.0.1:32888:33888
