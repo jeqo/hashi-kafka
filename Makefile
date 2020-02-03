@@ -17,7 +17,17 @@ nomad:
 		-vault-address=http://172.17.0.1:8200 \
 		-vault-token=root
 
-# -vault-ca-path=root-ca.pem
+.PHONY: run-zookeeper-job
+run-zookeeper-job:
+	nomad run zookeeper_unique_tasks.nomad
+
+.PHONY: kill-zookeeper-job
+kill-zookeeper-job:
+	nomad stop kafka-zookeeper
+
+.PHONY: zookeeper-quorum-check
+zookeeper-quorum-check:
+	for con in `docker ps -q --filter "ancestor=zookeeper:3.5.5"` ; do echo "$$con" && docker exec $$con /bin/bash -c "/apache-zookeeper-3.5.5-bin/bin/zkServer.sh status"; done
 
 # .PHONY: run-kafka-job
 # run-kafka-job:

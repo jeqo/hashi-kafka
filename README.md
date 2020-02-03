@@ -65,6 +65,31 @@ $KAFKA_HOME/bin/kafka-console-producer.sh --broker-list <one of consul instances
 ```bash
 $KAFKA_HOME/bin/kafka-console-consumer.sh --bootstrap-server <one of consul instances> --topic test --consumer.config consumer.properties --from-beginning
 ```
+### Validate (verify)
+for con in `docker ps -q --filter "ancestor=zookeeper:3.5.5"` ; \
+    do echo "$con" && docker exec $con /bin/bash -c "/apache-zookeeper-3.5.5-bin/bin/zkServer.sh status"; \
+    done
+
+```
+ea9b728496c1
+ZooKeeper JMX enabled by default
+Using config: /conf/zoo.cfg
+Client port not found in static config file. Looking in dynamic config file.
+Client port found: 30285. Client address: 0.0.0.0.
+Mode: follower
+60dde5c715a0
+ZooKeeper JMX enabled by default
+Using config: /conf/zoo.cfg
+Client port not found in static config file. Looking in dynamic config file.
+Client port found: 26926. Client address: 0.0.0.0.
+Mode: follower
+bbdb4006bc2e
+ZooKeeper JMX enabled by default
+Using config: /conf/zoo.cfg
+Client port not found in static config file. Looking in dynamic config file.
+Client port found: 21097. Client address: 0.0.0.0.
+Mode: leader
+```
 
 ## Next steps
 
